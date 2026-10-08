@@ -39,8 +39,11 @@ def get_llm(provider: str = None, temperature: float = 0.0):
         kwargs = {
             "model": config.OPENAI_MODEL,
             "api_key": config.OPENAI_API_KEY,
-            "temperature": temperature,
         }
+        # vlearn Gateway: nhóm gpt-5.6 chỉ chấp nhận temperature mặc định.
+        model_id = config.OPENAI_MODEL.rsplit("/", 1)[-1]
+        if not model_id.startswith("gpt-5.6"):
+            kwargs["temperature"] = temperature
         if config.OPENAI_BASE_URL:
             kwargs["base_url"] = config.OPENAI_BASE_URL
         return ChatOpenAI(**kwargs)
@@ -113,6 +116,8 @@ def get_embeddings(provider: str = None):
         }
         if config.OPENAI_BASE_URL:
             kwargs["base_url"] = config.OPENAI_BASE_URL
+            # Gửi văn bản thay vì token IDs cho API embeddings tương thích OpenAI.
+            kwargs["check_embedding_ctx_length"] = False
         return OpenAIEmbeddings(**kwargs)
 
     elif provider == "gemini":
